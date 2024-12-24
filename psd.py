@@ -456,7 +456,7 @@ def main():
     if menu == "Tampilkan dan Proses Data":
         st.header('1. Tampilkan dan Proses Data')
         # Ganti dengan path file Excel Anda
-        file_path = 'C:\\Users\\UseR\\Downloads\\PSD Projek\\Graduation_Prediction.xlsx'  # Pastikan path ini benar
+        file_path = 'Graduation_Prediction.xlsx'  # Pastikan path ini benar
         df = pd.read_excel(file_path)
         
         # Tampilkan data dalam bentuk tabel
