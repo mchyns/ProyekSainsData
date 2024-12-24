@@ -127,9 +127,14 @@ def train_models(X, y, scaler, k=5):
             return
 
         # Pastikan kolom X_test sesuai dengan X_train
-        X_test = X_test[X_train.columns]  # Mengatur ulang kolom X_test
+        X_test = X_test[X_train.columns.intersection(X_test.columns)]  # Mengatur ulang kolom X_test
 
-        X_test_scaled = scaler.transform(X_test)  # Terapkan scaler
+        # Terapkan scaler
+        try:
+            X_test_scaled = scaler.transform(X_test)  # Terapkan scaler
+        except ValueError as e:
+            st.error(f"Error saat menerapkan scaler: {str(e)}")
+            return
 
         y_pred = model.predict(X_test_scaled)
 
@@ -155,21 +160,6 @@ def train_models(X, y, scaler, k=5):
         }
 
     return results
-
-def plot_model_comparison(results):
-    """
-    Plot accuracy comparison between models
-    """
-    accuracies = {name: result['accuracy'] for name, result in results.items()}
-    
-    fig = px.bar(
-        x=list(accuracies.keys()),
-        y=list(accuracies.values()),
-        title='Perbandingan Akurasi Model',
-        labels={'x': 'Model', 'y': 'Akurasi'},
-    )
-    
-    return fig
 
 def plot_confusion_matrix(conf_matrix, model_name):
     """
