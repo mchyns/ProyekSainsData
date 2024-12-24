@@ -489,20 +489,23 @@ def main():
             feature_target_plot = plot_feature_target_relationship(df_clean[categorical_columns + numerical_columns], df_clean['Target'])
             st.plotly_chart(feature_target_plot)
 
-    elif menu == "Training Model":
-        st.header('2. Training Model')
-        if 'df_clean' in st.session_state:
-            df_clean = st.session_state['df_clean']
-            features = st.session_state['categorical_columns'] + st.session_state['numerical_columns']
-            X = df_clean[features]
-            y = df_clean['Target']
-            k = st.slider('Pilih nilai K untuk KNN:', min_value=1, max_value=20, value=5)
-            
-            if st.button('Train Models') or st.session_state['training_done']:
-                if not st.session_state['training_done']:
-                    results = train_models(X, y, st.session_state['scaler'], k)
+ elif menu == "Training Model":
+    st.header('2. Training Model')
+    if 'df_clean' in st.session_state:
+        df_clean = st.session_state['df_clean']
+        features = st.session_state['categorical_columns'] + st.session_state['numerical_columns']
+        X = df_clean[features]
+        y = df_clean['Target']
+        k = st.slider('Pilih nilai K untuk KNN:', min_value=1, max_value=20, value=5)
+        
+        if st.button('Train Models') or st.session_state['training_done']:
+            if not st.session_state['training_done']:
+                results = train_models(X, y, st.session_state['scaler'], k)  # Pass scaler here
+                if results:  # Pastikan results tidak kosong
                     st.session_state['results'] = results
                     st.session_state['training_done'] = True
+                else:
+                    st.error("Tidak ada hasil yang dihasilkan dari pelatihan model.")
                 
                 results = st.session_state['results']
                 
