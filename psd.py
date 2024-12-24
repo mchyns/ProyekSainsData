@@ -489,7 +489,7 @@ def main():
             feature_target_plot = plot_feature_target_relationship(df_clean[categorical_columns + numerical_columns], df_clean['Target'])
             st.plotly_chart(feature_target_plot)
 
- elif menu == "Training Model":
+ if menu == "Training Model":
     st.header('2. Training Model')
     if 'df_clean' in st.session_state:
         df_clean = st.session_state['df_clean']
