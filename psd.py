@@ -453,11 +453,23 @@ def main():
     if 'results_displayed' not in st.session_state:
         st.session_state['results_displayed'] = False
     
-    if menu == "Tampilkan dan Proses Data":
-        st.header('1. Tampilkan dan Proses Data')
-        # Ganti dengan path file Excel Anda
-        file_path = 'Graduation_Prediction.xlsx'  # Pastikan path ini benar
-        df = pd.read_excel(file_path)
+    if menu == "Training Model":
+        st.header('2. Training Model')
+        if 'df_clean' in st.session_state:
+            df_clean = st.session_state['df_clean']
+            features = st.session_state['categorical_columns'] + st.session_state['numerical_columns']
+            X = df_clean[features]
+            y = df_clean['Target']
+            k = st.slider('Pilih nilai K untuk KNN:', min_value=1, max_value=20, value=5)
+            
+            if st.button('Train Models') or st.session_state['training_done']:
+                if not st.session_state['training_done']:
+                    results = train_models(X, y, st.session_state['scaler'], k)  # Pass scaler here
+                    if results:  # Pastikan results tidak kosong
+                        st.session_state['results'] = results
+                        st.session_state['training_done'] = True
+                    else:
+                        st.error("Tidak ada hasil yang dihasilkan dari pelatihan model.")
         
         # Tampilkan data dalam bentuk tabel
         st.write("Data Preview:")
