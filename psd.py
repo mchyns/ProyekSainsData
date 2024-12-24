@@ -127,7 +127,12 @@ def train_models(X, y, scaler, k=5):
             return
         
         # Pastikan kolom X_test sesuai dengan X_train
-        X_test = X_test[X_train.columns.intersection(X_test.columns)]  # Mengatur ulang kolom X_test
+        missing_cols = set(X_train.columns) - set(X_test.columns)
+        if missing_cols:
+            st.error(f"Kolom yang hilang di X_test: {', '.join(missing_cols)}")
+            return
+        
+        X_test = X_test[X_train.columns]  # Mengatur ulang kolom X_test
         
         # Terapkan scaler
         try:
