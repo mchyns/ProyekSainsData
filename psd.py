@@ -105,31 +105,34 @@ def train_models(X, y, scaler, k=5):
     """
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
+
     # Initialize models
     models = {
         'KNN': KNeighborsClassifier(n_neighbors=k),
         'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42),
         'SVM': SVC(probability=True, random_state=42)
     }
-    
+
     results = {}
-    
+
     # Train and evaluate each model
     for name, model in models.items():
         # Train model
         model.fit(X_train, y_train)
-        
+
         # Make predictions
         # Cek dan skala X_test
         if X_test.isnull().values.any():
             st.error("X_test mengandung nilai yang hilang. Silakan periksa data Anda.")
             return
-        
+
+        # Pastikan kolom X_test sesuai dengan X_train
+        X_test = X_test[X_train.columns]  # Mengatur ulang kolom X_test
+
         X_test_scaled = scaler.transform(X_test)  # Terapkan scaler
-        
+
         y_pred = model.predict(X_test_scaled)
-        
+
         # Calculate metrics
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred, average='weighted')
@@ -137,7 +140,7 @@ def train_models(X, y, scaler, k=5):
         f1 = f1_score(y_test, y_pred, average='weighted')
         report = classification_report(y_test, y_pred)
         conf_matrix = confusion_matrix(y_test, y_pred)
-        
+
         results[name] = {
             'model': model,
             'accuracy': accuracy,
@@ -150,7 +153,7 @@ def train_models(X, y, scaler, k=5):
             'y_test': y_test,
             'y_pred': y_pred
         }
-    
+
     return results
 
 def plot_model_comparison(results):
