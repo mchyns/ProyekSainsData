@@ -105,39 +105,39 @@ def train_models(X, y, scaler, k=5):
     """
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
+    
     # Initialize models
     models = {
         'KNN': KNeighborsClassifier(n_neighbors=k),
         'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42),
         'SVM': SVC(probability=True, random_state=42)
     }
-
+    
     results = {}
-
+    
     # Train and evaluate each model
     for name, model in models.items():
         # Train model
         model.fit(X_train, y_train)
-
+        
         # Make predictions
         # Cek dan skala X_test
         if X_test.isnull().values.any():
             st.error("X_test mengandung nilai yang hilang. Silakan periksa data Anda.")
             return
-
+        
         # Pastikan kolom X_test sesuai dengan X_train
         X_test = X_test[X_train.columns.intersection(X_test.columns)]  # Mengatur ulang kolom X_test
-
+        
         # Terapkan scaler
         try:
             X_test_scaled = scaler.transform(X_test)  # Terapkan scaler
         except ValueError as e:
             st.error(f"Error saat menerapkan scaler: {str(e)}")
             return
-
+        
         y_pred = model.predict(X_test_scaled)
-
+        
         # Calculate metrics
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred, average='weighted')
@@ -145,7 +145,7 @@ def train_models(X, y, scaler, k=5):
         f1 = f1_score(y_test, y_pred, average='weighted')
         report = classification_report(y_test, y_pred)
         conf_matrix = confusion_matrix(y_test, y_pred)
-
+        
         results[name] = {
             'model': model,
             'accuracy': accuracy,
@@ -158,8 +158,23 @@ def train_models(X, y, scaler, k=5):
             'y_test': y_test,
             'y_pred': y_pred
         }
-
+    
     return results
+
+def plot_model_comparison(results):
+    """
+    Plot accuracy comparison between models
+    """
+    accuracies = {name: result['accuracy'] for name, result in results.items()}
+    
+    fig = px.bar(
+        x=list(accuracies.keys()),
+        y=list(accuracies.values()),
+        title='Perbandingan Akurasi Model',
+        labels={'x': 'Model', 'y': 'Akurasi'},
+    )
+    
+    return fig
 
 def plot_confusion_matrix(conf_matrix, model_name):
     """
@@ -453,23 +468,11 @@ def main():
     if 'results_displayed' not in st.session_state:
         st.session_state['results_displayed'] = False
     
-    if menu == "Training Model":
-        st.header('2. Training Model')
-        if 'df_clean' in st.session_state:
-            df_clean = st.session_state['df_clean']
-            features = st.session_state['categorical_columns'] + st.session_state['numerical_columns']
-            X = df_clean[features]
-            y = df_clean['Target']
-            k = st.slider('Pilih nilai K untuk KNN:', min_value=1, max_value=20, value=5)
-            
-            if st.button('Train Models') or st.session_state['training_done']:
-                if not st.session_state['training_done']:
-                    results = train_models(X, y, st.session_state['scaler'], k)  # Pass scaler here
-                    if results:  # Pastikan results tidak kosong
-                        st.session_state['results'] = results
-                        st.session_state['training_done'] = True
-                    else:
-                        st.error("Tidak ada hasil yang dihasilkan dari pelatihan model.")
+    if menu == "Tampilkan dan Proses Data":
+        st.header('1. Tampilkan dan Proses Data')
+        # Ganti dengan path file Excel Anda
+        file_path = 'Graduation_Prediction.xlsx'  # Pastikan path ini benar
+        df = pd.read_excel(file_path)
         
         # Tampilkan data dalam bentuk tabel
         st.write("Data Preview:")
@@ -501,23 +504,23 @@ def main():
             feature_target_plot = plot_feature_target_relationship(df_clean[categorical_columns + numerical_columns], df_clean['Target'])
             st.plotly_chart(feature_target_plot)
 
- if menu == "Training Model":
-    st.header('2. Training Model')
-    if 'df_clean' in st.session_state:
-        df_clean = st.session_state['df_clean']
-        features = st.session_state['categorical_columns'] + st.session_state['numerical_columns']
-        X = df_clean[features]
-        y = df_clean['Target']
-        k = st.slider('Pilih nilai K untuk KNN:', min_value=1, max_value=20, value=5)
-        
-        if st.button('Train Models') or st.session_state['training_done']:
-            if not st.session_state['training_done']:
-                results = train_models(X, y, st.session_state['scaler'], k)  # Pass scaler here
-                if results:  # Pastikan results tidak kosong
-                    st.session_state['results'] = results
-                    st.session_state['training_done'] = True
-                else:
-                    st.error("Tidak ada hasil yang dihasilkan dari pelatihan model.")
+    elif menu == "Training Model":
+        st.header('2. Training Model')
+        if 'df_clean' in st.session_state:
+            df_clean = st.session_state['df_clean']
+            features = st.session_state['categorical_columns'] + st.session_state['numerical_columns']
+            X = df_clean[features]
+            y = df_clean['Target']
+            k = st.slider('Pilih nilai K untuk KNN:', min_value=1, max_value=20, value=5)
+            
+            if st.button('Train Models') or st.session_state['training_done']:
+                if not st.session_state['training_done']:
+                    results = train_models(X, y, st.session_state['scaler'], k)
+                    if results:
+                        st.session_state['results'] = results
+                        st.session_state['training_done'] = True
+                    else:
+                        st.error("Tidak ada hasil yang dihasilkan dari pelatihan model.")
                 
                 results = st.session_state['results']
                 
