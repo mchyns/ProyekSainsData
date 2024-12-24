@@ -16,7 +16,7 @@ import plotly.graph_objects as go
 
 def load_data(file):
     """
-    Load and validate data from uploaded file
+    Load and validate data from uploaded file   
     """
     try:
         if file.name.endswith('.csv'):
@@ -99,7 +99,7 @@ def preprocess_data(df):
     
     return df_clean, scaler, label_encoders, categorical_columns, numerical_columns
 
-def train_models(X, y, k=5):
+def train_models(X, y, scaler, k=5):
     """
     Train multiple models and return their metrics
     """
@@ -121,7 +121,14 @@ def train_models(X, y, k=5):
         model.fit(X_train, y_train)
         
         # Make predictions
-        y_pred = model.predict(X_test)
+        # Cek dan skala X_test
+        if X_test.isnull().values.any():
+            st.error("X_test mengandung nilai yang hilang. Silakan periksa data Anda.")
+            return
+        
+        X_test_scaled = scaler.transform(X_test)  # Terapkan scaler
+        
+        y_pred = model.predict(X_test_scaled)
         
         # Calculate metrics
         accuracy = accuracy_score(y_test, y_pred)
@@ -500,7 +507,7 @@ def main():
             
             if st.button('Train Models') or st.session_state['training_done']:
                 if not st.session_state['training_done']:
-                    results = train_models(X, y, k)
+                    results = train_models(X, y, st.session_state['scaler'], k)
                     st.session_state['results'] = results
                     st.session_state['training_done'] = True
                 
